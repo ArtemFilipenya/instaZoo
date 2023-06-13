@@ -5,13 +5,14 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
 import java.util.*;
 
 @Data
 @Entity(name = "users")
-public class User {
+public class User implements UserDetails {
     private static final String USER_NAME = "user_name";
     private static final String LAST_NAME = "last_name";
     private static final String USER_ROLE = "user_role";
@@ -43,8 +44,50 @@ public class User {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "user", orphanRemoval = true)
     private List<Post> posts = new ArrayList<>();
 
+    public User(Long id, String userName, String email, String password, Collection<? extends GrantedAuthority> authorities) {
+        this.id = id;
+        this.userName = userName;
+        this.email = email;
+        this.password = password;
+        this.authorities = authorities;
+    }
+
+    public User() {
+
+    }
+
     @PrePersist
     protected void onCreate() {
         this.createdDate = LocalDateTime.now();
+    }
+
+    @Override
+    public String getUsername() {
+        return this.userName;
+    }
+
+    @Override
+    public String getPassword() {
+        return this.password;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
 }
